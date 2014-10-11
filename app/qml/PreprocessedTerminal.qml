@@ -152,18 +152,20 @@ Item{
         id: contextmenu
         MenuItem{action: copyAction}
         MenuItem{action: pasteAction}
-        MenuSeparator{}
-        MenuItem{action: fullscreenAction}
-        MenuItem{action: showMenubarAction}
+        MenuSeparator{visible: Qt.platform.os !== "osx"}
+        MenuItem{action: fullscreenAction; visible: Qt.platform.os !== "osx"}
+        MenuItem{action: showMenubarAction; visible: Qt.platform.os !== "osx"}
         MenuSeparator{visible: !shadersettings.showMenubar}
         CRTMainMenuBar{visible: !shadersettings.showMenubar}
     }
     MouseArea{
         acceptedButtons: Qt.LeftButton | Qt.MiddleButton | Qt.RightButton
-        anchors.fill: parent
+        // This is incredibly ugly. All this file should be reorganized.
+        width: (parent.width + dleft + dright) / shadersettings.window_scaling - dleft -dright
+        height: (parent.height + dtop + dbottom) / shadersettings.window_scaling - dtop - dbottom
         onWheel:{
             if(wheel.modifiers & Qt.ControlModifier){
-               wheel.angleDelta.y > 0 ? zoomIn.trigger() : zoomOut.trigger(); 
+               wheel.angleDelta.y > 0 ? zoomIn.trigger() : zoomOut.trigger();
             } else {
                 var coord = correctDistortion(wheel.x, wheel.y);
                 var lines = wheel.angleDelta.y > 0 ? -1 : 1;
@@ -313,7 +315,7 @@ Item{
     //  BLOOM  ////////////////////////////////////////////////////////////////
 
     Loader{
-        property real scaling: shadersettings.bloom_quality
+        property real scaling: shadersettings.bloom_quality * shadersettings.window_scaling
         id: bloomEffectLoader
         active: mBloom != 0
         asynchronous: true
